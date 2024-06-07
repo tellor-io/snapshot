@@ -91,6 +91,7 @@ export default {
         :network="safe.network"
         :reality-address="safe.realityAddress"
         :uma-address="safe.umaAddress"
+        :tellor-address="safe.tellorAddress"
         :multi-send-address="safe.multiSendAddress"
         :model-value="safe.txs"
         @update:model-value="updateSafeTransactions(index, $event)"

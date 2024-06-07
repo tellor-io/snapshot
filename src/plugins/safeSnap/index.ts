@@ -25,7 +25,8 @@ import {
   REALITY_MODULE_ABI,
   UMA_MODULE_ABI,
   ORACLE_ABI,
-  ERC20_ABI
+  ERC20_ABI,
+  TELLOR_MODULE_ABI
 } from './constants';
 import {
   buildQuestion,
@@ -160,6 +161,29 @@ export default class Plugin {
       .rules()
       .then(() => 'uma')
       .catch(() => 'reality');
+  }
+
+  async validateTellorModule(network: string, tellorAddress: string) {
+    if (!isAddress(tellorAddress)) return 'reality';
+  
+    const provider: StaticJsonRpcProvider = getProvider(network, {
+      broviderUrl
+    });
+    const moduleContract = new Contract(tellorAddress, TELLOR_MODULE_ABI, provider);
+  
+    try {
+      const expectedTypeHash = '0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218'
+      const returnedTypeHash = await moduleContract.DOMAIN_SEPARATOR_TYPEHASH();
+
+      if (expectedTypeHash === returnedTypeHash) {
+        return 'tellor';
+      } else {
+        return 'reality';
+      }
+    } catch (error) {
+      console.error('Validation failed:', error);
+      return 'reality';
+    }
   }
 
   async getExecutionDetailsUma(
@@ -563,3 +587,4 @@ export default class Plugin {
     console.log('[DAO module] executed vote on oracle:', receipt);
   }
 }
+

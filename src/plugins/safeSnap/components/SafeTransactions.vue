@@ -4,6 +4,7 @@ import { getIpfsUrl, shorten } from '@/helpers/utils';
 import SafeSnapTooltip from './Tooltip.vue';
 import SafeSnapHandleOutcome from './HandleOutcome.vue';
 import SafeSnapHandleOutcomeUma from './HandleOutcomeUma.vue';
+import SafeSnapHandleOutcomeTellor from './HandleOutcomeTellor.vue';
 import SafeSnapFormImportTransactionsButton from './Form/ImportTransactionsButton.vue';
 import SafeSnapFormTransactionBatch from './Form/TransactionBatch.vue';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
@@ -166,6 +167,7 @@ export default {
     SafeSnapFormImportTransactionsButton,
     SafeSnapHandleOutcome,
     SafeSnapHandleOutcomeUma,
+    SafeSnapHandleOutcomeTellor,
     SafeSnapFormTransactionBatch
   },
   props: [
@@ -176,6 +178,7 @@ export default {
     'network',
     'realityAddress',
     'umaAddress',
+    'tellorAddress',
     'multiSendAddress',
     'preview',
     'hash'
@@ -202,6 +205,7 @@ export default {
         gnosisSafeAddress: undefined,
         realityAddress: this.realityAddress,
         umaAddress: this.umaAddress,
+        tellorAddress: this.tellorAddress,
         network: this.network,
         multiSendAddress: this.multiSendAddress,
         tokens: [],
@@ -228,11 +232,20 @@ export default {
     }
   },
   async mounted() {
+    console.log('SafeTransactions component mounted');
+    console.log(this.tellorAddress)
     try {
-      const moduleType = await plugin.validateUmaModule(
+      let moduleType = await plugin.validateUmaModule(
         this.network,
         this.umaAddress
       );
+      if (moduleType == 'reality') {
+        moduleType = await plugin.validateTellorModule(
+          this.network,
+          this.tellorAddress
+        );
+      }
+      console.log(moduleType)
 
       const { dao } =
         moduleType === 'reality'
@@ -245,6 +258,7 @@ export default {
       const moduleAddress =
         moduleType === 'reality' ? this.realityAddress : this.umaAddress;
 
+      if (this.umaAddress)
       this.moduleType = moduleType;
       this.moduleAddress = moduleAddress;
       this.gnosisSafeAddress = dao;
@@ -389,7 +403,24 @@ export default {
           :multi-send-address="transactionConfig.multiSendAddress"
           :network="transactionConfig.network"
         />
+
+        <SafeSnapHandleOutcomeTellor
+          v-if="
+            preview &&
+            proposalResolved &&
+            moduleType === 'tellor' &&
+            moduleTypeReady
+          "
+          :batches="input"
+          :proposal="proposal"
+          :space="space"
+          :results="results"
+          :tellor-address="transactionConfig.tellorAddress"
+          :multi-send-address="transactionConfig.multiSendAddress"
+          :network="transactionConfig.network"
+        />
       </div>
     </div>
   </div>
 </template>
+

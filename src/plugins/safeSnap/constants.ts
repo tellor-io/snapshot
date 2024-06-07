@@ -335,6 +335,12 @@ export const MULTI_SEND_ABI = [
   'function multiSend(bytes transactions) payable'
 ];
 
+export const TELLOR_MODULE_ABI = [
+  'function addProposal(string _proposalId, bytes32[] _txHashes) external',
+  'function executeProposalWithIndex(string _proposalId, bytes32[] _txHashes, address _to, uint256 _value, bytes _data, uint8 _operation, uint256 _txIndex) external',
+  'function DOMAIN_SEPARATOR_TYPEHASH() external view returns (bytes32)'
+];
+
 // MULTI SEND CONSTANTS
 
 export const MULTI_SEND_V1_3_0 = {
